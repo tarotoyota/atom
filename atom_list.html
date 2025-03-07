@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <title>Atom Instance Comparison</title>
+    <style>
+
+    #comparison {
+    overflow-x: auto; /* 横方向のスクロールバーを表示 */
+}
+
+#comparison table {
+    table-layout: fixed; /* テーブルレイアウトを固定 */
+    width: 100%; /* テーブルの幅を100%に設定 */
+}
+
+#comparison th, #comparison td {
+    width: 200px; /* セルの幅を200pxに設定（必要に応じて調整） */
+    word-wrap: break-word; /* セル内で単語を折り返す */
+    overflow: hidden; /* セルの内容がはみ出た場合に非表示にする */
+    text-overflow: ellipsis; /* はみ出た部分に省略記号を表示 */
+}
+
+
+        .container { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        select { width: 200px; padding: 5px; }
+        #comparison { display: flex; justify-content: space-between; }
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div>
+            <label for="atomA">Atom instance A:</label>
+            <select id="atomA" onchange="updateComparison()"></select>
+        </div>
+        <div>
+            <label for="atomB">Atom instance B:</label>
+            <select id="atomB" onchange="updateComparison()"></select>
+        </div>
+    </div>
+
+
+
+<div id="comparison">
+    <table>
+        <thead>
+            <tr>
+                <th class="sticky-header">Atom A</th>
+                <th class="sticky-header">Property</th>
+                <th class="sticky-header">Atom B</th>
+            </tr>
+        </thead>
+        <tbody id="comparison-body">
+
+
+    <script>
+        const atoms = {{ atoms|tojson|safe }};
+
+        function populateDropdowns() {
+            const dropdowns = [document.getElementById('atomA'), document.getElementById('atomB')];
+            dropdowns.forEach(dropdown => {
+                atoms.forEach(atom => {
+                    const option = document.createElement('option');
+                    option.value = atom.name;
+                    option.textContent = atom.name;
+                    dropdown.appendChild(option);
+                });
+            });
+        }
+
+function updateComparison() {
+    const atomA = atoms.find(a => a.name === document.getElementById('atomA').value);
+    const atomB = atoms.find(a => a.name === document.getElementById('atomB').value);
+
+    if (!atomA || !atomB) return;
+
+    let comparisonHtml = '';
+    for (const key in atomA) {
+        if (key !== 'name') {
+            comparisonHtml += `
+                <tr>
+                    <td>${atomA[key]}</td>
+                    <th>${key}</th>
+                    <td>${atomB[key]}</td>
+                </tr>
+            `;
+        }
+    }
+    document.getElementById('comparison-body').innerHTML = comparisonHtml;
+}
+
+        populateDropdowns();
+        updateComparison();
+    </script>
+            </tbody>
+    </table>
+</body>
+</html>
